@@ -85,10 +85,47 @@ class Property(db.Model, SerializerMixin):
         return f"<Property {self.name}>"
 
 
-class Tenant(db.Model, SerializerMixin):
-    __tablename__ = "tenants"
+# class Tenant(db.Model, SerializerMixin):
+#     __tablename__ = "tenants"
 
-    serialize_rules = ("-properties.tenants", "-rent_payments.tenant")
+#     serialize_rules = ("-properties.tenants", "-rent_payments.tenant")
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     first_name = db.Column(db.String(80), nullable=False)
+#     last_name = db.Column(db.String(80), nullable=False)
+#     email = db.Column(db.String(120), unique=True, nullable=False)
+#     phone = db.Column(db.String(20), nullable=False)
+#     national_id = db.Column(db.String(50), unique=True)
+#     emergency_contact = db.Column(db.String(120))
+#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+#     # Many-to-many: Tenant <-> Property through RentPayment
+#     rent_payments = db.relationship("RentPayment", back_populates="tenant", cascade="all, delete-orphan")
+#     properties = db.relationship("Property", secondary="rent_payments", viewonly=True)
+
+#     @validates("email")
+#     def validate_email(self, key, value):
+#         pattern = r"^[\w\.-]+@[\w\.-]+\.\w{2,}$"
+#         if not re.match(pattern, value):
+#             raise ValueError("Invalid email format.")
+#         return value
+
+#     @validates("phone")
+#     def validate_phone(self, key, value):
+#         pattern = r"^\+?[\d\s\-]{7,15}$"
+#         if not re.match(pattern, value):
+#             raise ValueError("Invalid phone number format.")
+#         return value
+
+#     @property
+#     def full_name(self):
+#         return f"{self.first_name} {self.last_name}"
+
+#     def __repr__(self):
+#         return f"<Tenant {self.full_name}>"
+
+class Tenant(db.Model):
+    __tablename__ = "tenants"
 
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(80), nullable=False)
@@ -99,31 +136,34 @@ class Tenant(db.Model, SerializerMixin):
     emergency_contact = db.Column(db.String(120))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Many-to-many: Tenant <-> Property through RentPayment
-    rent_payments = db.relationship("RentPayment", back_populates="tenant", cascade="all, delete-orphan")
-    properties = db.relationship("Property", secondary="rent_payments", viewonly=True)
-
-    @validates("email")
-    def validate_email(self, key, value):
-        pattern = r"^[\w\.-]+@[\w\.-]+\.\w{2,}$"
-        if not re.match(pattern, value):
-            raise ValueError("Invalid email format.")
-        return value
-
-    @validates("phone")
-    def validate_phone(self, key, value):
-        pattern = r"^\+?[\d\s\-]{7,15}$"
-        if not re.match(pattern, value):
-            raise ValueError("Invalid phone number format.")
-        return value
+    # relationships
+    rent_payments = db.relationship(
+        "RentPayment",
+        back_populates="tenant",
+        cascade="all, delete-orphan"
+    )
+    properties = db.relationship(
+        "Property",
+        secondary="rent_payments",
+        viewonly=True
+    )
 
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
-    def __repr__(self):
-        return f"<Tenant {self.full_name}>"
-
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "full_name": self.full_name,
+            "email": self.email,
+            "phone": self.phone,
+            "national_id": self.national_id,
+            "emergency_contact": self.emergency_contact,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
 
 class RentPayment(db.Model, SerializerMixin):
     """

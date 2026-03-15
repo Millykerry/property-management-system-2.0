@@ -125,6 +125,12 @@ def delete_property(id):
 #  TENANT ROUTES (Full CRUD)
 # ─────────────────────────────────────────────
 
+# @app.route("/api/tenants", methods=["GET"])
+# @jwt_required()
+# def get_tenants():
+#     tenants = Tenant.query.all()
+#     return jsonify([t.to_dict() for t in tenants]), 200
+
 @app.route("/api/tenants", methods=["GET"])
 @jwt_required()
 def get_tenants():
