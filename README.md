@@ -87,11 +87,12 @@ The Flask API will run at: http://localhost:5555Default seed credentials:
 Email: admin@propertyhub.com
 Password: Admin@1234
 
----
+```
 
 ### Frontend Setup
 
----
+```bash
+
 # 1. Navigate to the client directory
 cd client
 
@@ -101,8 +102,11 @@ npm install
 # 3. Start the development server
 npm run dev
 
+```
+
 ### Folder structure
 
+```bash
 property-management/
 ├── server/
 │   ├── app.py          # Flask routes and API
@@ -119,3 +123,5 @@ property-management/
     │   └── index.css   # Global styles
     ├── public/
     └── package.json
+
+```
