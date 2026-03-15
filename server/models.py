@@ -165,46 +165,77 @@ class Tenant(db.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
 
-class RentPayment(db.Model, SerializerMixin):
-    """
-    Association table (many-to-many between Tenant and Property)
-    with user-submittable attributes: amount_paid, payment_date, status, notes
-    """
+# class RentPayment(db.Model, SerializerMixin):
+#     """
+#     Association table (many-to-many between Tenant and Property)
+#     with user-submittable attributes: amount_paid, payment_date, status, notes
+#     """
+#     __tablename__ = "rent_payments"
+
+#     serialize_rules = ("-tenant.rent_payments", "-property.rent_payments")
+
+#     id = db.Column(db.Integer, primary_key=True)
+
+#     # Foreign keys
+#     tenant_id = db.Column(db.Integer, db.ForeignKey("tenants.id"), nullable=False)
+#     property_id = db.Column(db.Integer, db.ForeignKey("properties.id"), nullable=False)
+
+#     # User-submittable attributes
+#     amount_paid = db.Column(db.Float, nullable=False)
+#     payment_date = db.Column(db.Date, nullable=False)
+#     due_date = db.Column(db.Date, nullable=False)
+#     status = db.Column(db.String(20), default="pending")  # paid, pending, overdue
+#     payment_method = db.Column(db.String(50), default="cash")  # cash, bank_transfer, mpesa
+#     notes = db.Column(db.Text)
+#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+#     # Relationships
+#     tenant = db.relationship("Tenant", back_populates="rent_payments")
+#     property = db.relationship("Property", back_populates="rent_payments")
+
+#     @validates("amount_paid")
+#     def validate_amount(self, key, value):
+#         if float(value) <= 0:
+#             raise ValueError("Amount paid must be a positive number.")
+#         return value
+
+#     @validates("status")
+#     def validate_status(self, key, value):
+#         allowed = ["paid", "pending", "overdue", "partial"]
+#         if value not in allowed:
+#             raise ValueError(f"Status must be one of: {', '.join(allowed)}")
+#         return value
+
+#     def __repr__(self):
+#         return f"<RentPayment Tenant:{self.tenant_id} Property:{self.property_id}>"
+
+class RentPayment(db.Model):
     __tablename__ = "rent_payments"
 
-    serialize_rules = ("-tenant.rent_payments", "-property.rent_payments")
-
     id = db.Column(db.Integer, primary_key=True)
-
-    # Foreign keys
     tenant_id = db.Column(db.Integer, db.ForeignKey("tenants.id"), nullable=False)
     property_id = db.Column(db.Integer, db.ForeignKey("properties.id"), nullable=False)
-
-    # User-submittable attributes
     amount_paid = db.Column(db.Float, nullable=False)
     payment_date = db.Column(db.Date, nullable=False)
     due_date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String(20), default="pending")  # paid, pending, overdue
-    payment_method = db.Column(db.String(50), default="cash")  # cash, bank_transfer, mpesa
+    status = db.Column(db.String(20), default="pending")
+    payment_method = db.Column(db.String(50), default="cash")
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationships
     tenant = db.relationship("Tenant", back_populates="rent_payments")
     property = db.relationship("Property", back_populates="rent_payments")
 
-    @validates("amount_paid")
-    def validate_amount(self, key, value):
-        if float(value) <= 0:
-            raise ValueError("Amount paid must be a positive number.")
-        return value
-
-    @validates("status")
-    def validate_status(self, key, value):
-        allowed = ["paid", "pending", "overdue", "partial"]
-        if value not in allowed:
-            raise ValueError(f"Status must be one of: {', '.join(allowed)}")
-        return value
-
-    def __repr__(self):
-        return f"<RentPayment Tenant:{self.tenant_id} Property:{self.property_id}>"
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "tenant_id": self.tenant_id,
+            "property_id": self.property_id,
+            "amount_paid": self.amount_paid,
+            "payment_date": self.payment_date.isoformat() if self.payment_date else None,
+            "due_date": self.due_date.isoformat() if self.due_date else None,
+            "status": self.status,
+            "payment_method": self.payment_method,
+            "notes": self.notes,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
